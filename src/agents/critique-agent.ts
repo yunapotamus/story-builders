@@ -14,9 +14,15 @@ export class CritiqueAgent extends BaseAgent {
       },
     ];
 
-    // If there's no file attached, prompt the user to provide writing
+    // If there's no file attached and the message doesn't look like writing, show help
+    // BUT: if a file is attached (even if empty), we should try to process it
     if (!context.fileContent && !this.seemsLikeWritingSample(userMessage)) {
       return this.getHelpMessage();
+    }
+
+    // If we have a file but it's empty/very short, let the user know
+    if (context.fileContent && context.fileContent.trim().length < 20) {
+      return `I received your file "${context.fileName}", but it appears to be empty or very short. Please make sure the file contains your writing sample and try again.`;
     }
 
     // Send to AI for critique

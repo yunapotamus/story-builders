@@ -13,7 +13,7 @@ critique:
 
     Focus on craft elements that will help the writer grow. Avoid generic praise or harsh criticism.
   defaultProvider: "anthropic"
-  model: "claude-3-5-sonnet-20241022"
+  model: "claude-sonnet-4-5-20250929"
 
 craft:
   name: "Craft Agent"
@@ -31,7 +31,7 @@ craft:
 
     Your goal is to educate and inspire writers to try new techniques in their work.
   defaultProvider: "anthropic"
-  model: "claude-3-5-sonnet-20241022"
+  model: "claude-sonnet-4-5-20250929"
 
 prompt:
   name: "Prompt Agent"
@@ -54,4 +54,4 @@ prompt:
 
     Your role is to inspire creativity and engage in thoughtful discussion about the writing process.
   defaultProvider: "anthropic"
-  model: "claude-3-5-sonnet-20241022"
+  model: "claude-sonnet-4-5-20250929"

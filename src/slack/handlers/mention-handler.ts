@@ -1,4 +1,4 @@
-import { App, AppMentionEvent, SayFn } from '@slack/bolt';
+import { App } from '@slack/bolt';
 import { AgentRegistry } from '../../agents';
 import { AgentContext } from '../../agents/base-agent';
 
@@ -17,8 +17,8 @@ export function registerMentionHandler(app: App, registry: AgentRegistry) {
 }
 
 async function handleMention(
-  event: AppMentionEvent,
-  say: SayFn,
+  event: any,
+  say: any,
   client: any,
   registry: AgentRegistry
 ) {
@@ -130,15 +130,41 @@ async function getUserName(client: any, userId: string): Promise<string> {
  */
 async function downloadFile(client: any, file: any): Promise<string | null> {
   try {
-    // Only download text files
-    if (!file.mimetype?.includes('text') && !file.name?.match(/\.(txt|md|doc)$/i)) {
+    // Check if this is a text-based file we can process
+    const writingFileExtensions = /\.(txt|md|tex|rtf|doc|docx|markdown|text)$/i;
+    const isTextMimetype = file.mimetype?.includes('text') || file.mimetype?.includes('latex');
+    const isWritingFile = writingFileExtensions.test(file.name);
+
+    if (!isTextMimetype && !isWritingFile) {
+      console.log(`Skipping non-text file: ${file.name} (${file.mimetype})`);
       return null;
     }
 
-    // Slack files API requires different authentication
-    // For now, we'll skip file downloads and rely on copy-paste
-    // In production, you'd use the files.info and download the content
-    return null;
+    // Check file size (limit to 1MB for text files)
+    if (file.size > 1024 * 1024) {
+      console.log(`File too large: ${file.name} (${file.size} bytes)`);
+      return null;
+    }
+
+    // Download the file content using the Slack Web API
+    console.log(`Downloading file: ${file.name} (${file.size} bytes)`);
+
+    // Fetch the file content - Slack requires authentication via the bot token
+    const response = await fetch(file.url_private_download, {
+      headers: {
+        'Authorization': `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to download file: HTTP ${response.status}`);
+      return null;
+    }
+
+    const content = await response.text();
+    console.log(`Successfully downloaded ${content.length} characters from ${file.name}`);
+
+    return content;
   } catch (error) {
     console.error('Error downloading file:', error);
     return null;
