@@ -39,14 +39,22 @@ AI-powered Slack agents for writing groups - providing critique, craft talks, an
 4. **Set up your Slack app**
    - Go to https://api.slack.com/apps
    - Create a new app "from scratch"
-   - Enable Socket Mode (for development)
-   - Add the following Bot Token Scopes:
-     - `app_mentions:read`
-     - `chat:write`
-     - `files:read`
-     - `users:read`
+   - Navigate to **OAuth & Permissions** and add these **Bot Token Scopes**:
+     - `app_mentions:read` - Listen for @mentions of the bot
+     - `chat:write` - Send messages as the bot
+     - `files:read` - Read files uploaded by users
+     - `users:read` - Get user display names
+   - Navigate to **Socket Mode** and enable it (for development)
+   - Generate an App-Level Token with `connections:write` scope
+   - Navigate to **Event Subscriptions** and toggle it on
+   - Subscribe to these bot events:
+     - `app_mention` - When bot is @mentioned
+     - `app_home_opened` - When user views the app home
    - Install the app to your workspace
-   - Copy the tokens to your `.env` file
+   - Copy these tokens to your `.env` file:
+     - **Bot User OAuth Token** → `SLACK_BOT_TOKEN`
+     - **Signing Secret** (from Basic Information) → `SLACK_SIGNING_SECRET`
+     - **App-Level Token** → `SLACK_APP_TOKEN`
 
 5. **Run in development mode**
    ```bash
