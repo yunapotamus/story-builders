@@ -1,0 +1,37 @@
+{
+  "name": "story-builders",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yunapotamus/story-builders.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yunapotamus/story-builders/issues"
+  },
+  "homepage": "https://github.com/yunapotamus/story-builders#readme",
+  "description": "AI-powered Slack agents for writing groups - critique, craft talks, and writing prompts",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.67.0",
+    "@slack/bolt": "^4.5.0",
+    "dotenv": "^17.2.3",
+    "js-yaml": "^4.1.0",
+    "openai": "^6.5.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.8.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
