@@ -6,14 +6,28 @@ export class PromptAgent extends BaseAgent {
     userMessage: string,
     context: AgentContext
   ): Promise<string> {
-    const messages: AIMessage[] = [
-      {
-        role: 'user',
-        content: this.formatUserMessage(userMessage, context),
-      },
-    ];
+    // Build the conversation with thread history if available
+    const messages: AIMessage[] = [];
 
-    if (this.isEmptyOrGreeting(userMessage)) {
+    // Add thread history first (for context)
+    if (context.threadHistory && context.threadHistory.length > 0) {
+      for (const historyMsg of context.threadHistory) {
+        messages.push({
+          role: historyMsg.role,
+          content: historyMsg.text,
+        });
+      }
+    }
+
+    // Add the current user message
+    messages.push({
+      role: 'user',
+      content: this.formatUserMessage(userMessage, context),
+    });
+
+    // Check if this is a greeting (only if no thread context)
+    const hasContext = context.threadHistory && context.threadHistory.length > 0;
+    if (this.isEmptyOrGreeting(userMessage) && !hasContext) {
       return this.getHelpMessage();
     }
 

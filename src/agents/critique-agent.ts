@@ -6,17 +6,30 @@ export class CritiqueAgent extends BaseAgent {
     userMessage: string,
     context: AgentContext
   ): Promise<string> {
-    // Build the conversation
-    const messages: AIMessage[] = [
-      {
-        role: 'user',
-        content: this.formatUserMessage(userMessage, context),
-      },
-    ];
+    // Build the conversation with thread history if available
+    const messages: AIMessage[] = [];
+
+    // Add thread history first (for context)
+    if (context.threadHistory && context.threadHistory.length > 0) {
+      for (const historyMsg of context.threadHistory) {
+        messages.push({
+          role: historyMsg.role,
+          content: historyMsg.text,
+        });
+      }
+    }
+
+    // Add the current user message
+    messages.push({
+      role: 'user',
+      content: this.formatUserMessage(userMessage, context),
+    });
 
     // If there's no file attached and the message doesn't look like writing, show help
     // BUT: if a file is attached (even if empty), we should try to process it
-    if (!context.fileContent && !this.seemsLikeWritingSample(userMessage)) {
+    // ALSO: if we have thread history, we should continue the conversation
+    const hasContext = context.threadHistory && context.threadHistory.length > 0;
+    if (!context.fileContent && !this.seemsLikeWritingSample(userMessage) && !hasContext) {
       return this.getHelpMessage();
     }
 

@@ -8,6 +8,18 @@ export interface AgentConfig {
   model: string;
 }
 
+export interface ThreadMessage {
+  role: 'user' | 'assistant';
+  userName: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface FileAttachment {
+  name: string;
+  content: string;
+}
+
 export interface AgentContext {
   userId: string;
   userName: string;
@@ -15,6 +27,8 @@ export interface AgentContext {
   threadTs?: string;
   fileContent?: string;
   fileName?: string;
+  files?: FileAttachment[];
+  threadHistory?: ThreadMessage[];
 }
 
 export abstract class BaseAgent {
@@ -71,7 +85,22 @@ export abstract class BaseAgent {
   protected formatUserMessage(message: string, context: AgentContext): string {
     let formatted = message;
 
-    if (context.fileContent && context.fileName) {
+    // Handle multiple files if present
+    if (context.files && context.files.length > 0) {
+      formatted = `${message}\n\n`;
+
+      if (context.files.length === 1) {
+        formatted += `[Attached file: ${context.files[0].name}]\n\`\`\`\n${context.files[0].content}\n\`\`\``;
+      } else {
+        formatted += `[${context.files.length} files attached]\n\n`;
+
+        for (let i = 0; i < context.files.length; i++) {
+          const file = context.files[i];
+          formatted += `File ${i + 1}: ${file.name}\n\`\`\`\n${file.content}\n\`\`\`\n\n`;
+        }
+      }
+    } else if (context.fileContent && context.fileName) {
+      // Backwards compatibility for single file
       formatted = `${message}\n\n[Attached file: ${context.fileName}]\n\`\`\`\n${context.fileContent}\n\`\`\``;
     }
 

@@ -44,6 +44,11 @@ AI-powered Slack agents for writing groups - providing critique, craft talks, an
      - `chat:write` - Send messages as the bot
      - `files:read` - Read files uploaded by users
      - `users:read` - Get user display names
+     - `channels:history` - Read thread history in public channels
+     - `groups:history` - Read thread history in private channels
+     - `mpim:history` - Read thread history in group DMs
+     - `im:history` - Read thread history in DMs
+     - `reactions:write` - Add/remove emoji reactions for status
    - Navigate to **Socket Mode** and enable it (for development)
    - Generate an App-Level Token with `connections:write` scope
    - Navigate to **Event Subscriptions** and toggle it on

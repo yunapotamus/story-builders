@@ -6,15 +6,28 @@ export class CraftAgent extends BaseAgent {
     userMessage: string,
     context: AgentContext
   ): Promise<string> {
-    const messages: AIMessage[] = [
-      {
-        role: 'user',
-        content: userMessage,
-      },
-    ];
+    // Build the conversation with thread history if available
+    const messages: AIMessage[] = [];
 
-    // Check if this is a request for a craft talk
-    if (this.isEmptyOrGreeting(userMessage)) {
+    // Add thread history first (for context)
+    if (context.threadHistory && context.threadHistory.length > 0) {
+      for (const historyMsg of context.threadHistory) {
+        messages.push({
+          role: historyMsg.role,
+          content: historyMsg.text,
+        });
+      }
+    }
+
+    // Add the current user message
+    messages.push({
+      role: 'user',
+      content: userMessage,
+    });
+
+    // Check if this is a request for a craft talk (only if no thread context)
+    const hasContext = context.threadHistory && context.threadHistory.length > 0;
+    if (this.isEmptyOrGreeting(userMessage) && !hasContext) {
       return this.getHelpMessage();
     }
 

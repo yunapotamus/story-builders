@@ -1,6 +1,7 @@
 import { App } from '@slack/bolt';
 import { AgentRegistry } from '../../agents';
-import { AgentContext } from '../../agents/base-agent';
+import { AgentContext, ThreadMessage } from '../../agents/base-agent';
+import { formatForSlack } from '../format-slack';
 
 export function registerMentionHandler(app: App, registry: AgentRegistry) {
   app.event('app_mention', async ({ event, say, client }) => {
@@ -51,31 +52,76 @@ async function handleMention(
     threadTs: event.thread_ts || event.ts,
   };
 
+  // Fetch thread history if this is in a thread
+  if (event.thread_ts) {
+    context.threadHistory = await getThreadHistory(client, event.channel, event.thread_ts);
+  }
+
   // Check for file attachments
   if ('files' in event && event.files && event.files.length > 0) {
-    const file = event.files[0];
-    const fileContent = await downloadFile(client, file);
-    if (fileContent) {
-      context.fileContent = fileContent;
-      context.fileName = file.name;
+    const files = [];
+
+    for (const file of event.files) {
+      const fileContent = await downloadFile(client, file);
+      if (fileContent) {
+        files.push({
+          name: file.name,
+          content: fileContent,
+        });
+      }
+    }
+
+    if (files.length > 0) {
+      context.files = files;
+      // For backwards compatibility, also set the first file
+      context.fileContent = files[0].content;
+      context.fileName = files[0].name;
     }
   }
 
-  // Send typing indicator
-  await client.chat.postMessage({
+  // Add "eyes" reaction to show we're processing
+  await client.reactions.add({
     channel: event.channel,
-    thread_ts: context.threadTs,
-    text: '_Processing..._',
+    timestamp: event.ts,
+    name: 'eyes',
   });
 
-  // Process the message with the agent
-  const response = await agent.processMessage(text, context);
+  try {
+    // Process the message with the agent
+    const response = await agent.processMessage(text, context);
 
-  // Send the response
-  await say({
-    text: response,
-    thread_ts: context.threadTs,
-  });
+    // Convert Markdown to Slack mrkdwn format
+    const formattedResponse = formatForSlack(response);
+
+    // Send the response
+    await say({
+      text: formattedResponse,
+      thread_ts: context.threadTs,
+    });
+
+    // Remove "eyes" and add "white_check_mark" to show we're done
+    await client.reactions.remove({
+      channel: event.channel,
+      timestamp: event.ts,
+      name: 'eyes',
+    });
+
+    await client.reactions.add({
+      channel: event.channel,
+      timestamp: event.ts,
+      name: 'white_check_mark',
+    });
+  } catch (error) {
+    // Remove "eyes" reaction on error
+    await client.reactions.remove({
+      channel: event.channel,
+      timestamp: event.ts,
+      name: 'eyes',
+    }).catch(() => {/* ignore errors removing reaction */});
+
+    // Re-throw to be caught by outer handler
+    throw error;
+  }
 }
 
 /**
@@ -122,6 +168,71 @@ async function getUserName(client: any, userId: string): Promise<string> {
   } catch (error) {
     console.error('Error getting user name:', error);
     return 'Writer';
+  }
+}
+
+/**
+ * Fetch thread history from Slack
+ */
+async function getThreadHistory(
+  client: any,
+  channelId: string,
+  threadTs: string
+): Promise<ThreadMessage[]> {
+  try {
+    const result = await client.conversations.replies({
+      channel: channelId,
+      ts: threadTs,
+      limit: 100, // Get up to 100 messages in the thread
+    });
+
+    if (!result.ok || !result.messages) {
+      console.error('Failed to fetch thread history');
+      return [];
+    }
+
+    const messages: ThreadMessage[] = [];
+    const userCache = new Map<string, string>();
+
+    for (const msg of result.messages) {
+      // Skip the current message (we'll add it separately)
+      // Skip bot messages that are just typing indicators
+      if (msg.text === '_Processing..._') continue;
+
+      // Determine role
+      let role: 'user' | 'assistant' = 'user';
+      let userName = 'User';
+
+      if (msg.bot_id) {
+        // This is a bot message (our agent)
+        role = 'assistant';
+        userName = msg.username || 'Story Builders';
+      } else if (msg.user) {
+        // This is a user message
+        // Get user name from cache or fetch it
+        if (!userCache.has(msg.user)) {
+          userCache.set(msg.user, await getUserName(client, msg.user));
+        }
+        userName = userCache.get(msg.user) || 'User';
+      }
+
+      // Clean up the message text (remove bot mentions)
+      let cleanText = msg.text || '';
+      cleanText = cleanText.replace(/<@[A-Z0-9]+>/g, '').trim();
+
+      messages.push({
+        role,
+        userName,
+        text: cleanText,
+        timestamp: msg.ts,
+      });
+    }
+
+    console.log(`Fetched ${messages.length} messages from thread ${threadTs}`);
+    return messages;
+  } catch (error) {
+    console.error('Error fetching thread history:', error);
+    return [];
   }
 }
 
