@@ -7,10 +7,11 @@
 node_modules
 .env
 .env.local
-src/
-tsconfig.json
+dist/
 *.md
 !CLAUDE.md
 .vscode
 .idea
 .DS_Store
+coverage/
+.nyc_output/

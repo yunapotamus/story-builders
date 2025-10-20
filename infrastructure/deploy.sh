@@ -26,14 +26,23 @@ PROJECT_ID=$GOOGLE_CLOUD_PROJECT
 REGION=${REGION:-us-central1}
 SERVICE_NAME="story-builders"
 
+# Generate a commit SHA or use timestamp if not in a git repo
+if git rev-parse HEAD &>/dev/null; then
+    COMMIT_SHA=$(git rev-parse --short HEAD)
+else
+    COMMIT_SHA=$(date +%s)
+fi
+
 echo -e "${GREEN}Deploying Story Builders to GCP Cloud Run${NC}"
 echo "Project: $PROJECT_ID"
 echo "Region: $REGION"
+echo "Image tag: $COMMIT_SHA"
 echo ""
 
 # Build and deploy
 echo -e "${YELLOW}Building Docker image...${NC}"
-gcloud builds submit --config=infrastructure/cloudbuild.yaml
+gcloud builds submit --config=infrastructure/cloudbuild.yaml \
+  --substitutions=COMMIT_SHA="$COMMIT_SHA"
 
 echo -e "${GREEN}Deployment complete!${NC}"
 echo ""
