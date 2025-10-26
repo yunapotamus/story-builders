@@ -7,6 +7,7 @@ AI-powered Slack agents for writing groups - providing critique, craft talks, an
 - **@critique** - Get thoughtful, constructive feedback on your writing samples
 - **@craft** - Research and prepare writing craft talks on specific topics
 - **@prompt** - Generate creative writing prompts and discuss your work
+- **@coach** - Celebrate milestones and get motivational support for your writing journey
 
 ## Quick Start
 
@@ -66,6 +67,27 @@ AI-powered Slack agents for writing groups - providing critique, craft talks, an
    npm run dev
    ```
 
+## Testing Agents Locally
+
+You can test agents directly from the command line without needing Slack:
+
+```bash
+npm run test-agent "<message>"
+```
+
+**Examples:**
+```bash
+# Test with explicit agent mention
+npm run test-agent "@coach I just finished my first draft!"
+npm run test-agent "@critique Please review this passage: It was a dark and stormy night..."
+
+# Test with auto-detection
+npm run test-agent "I just submitted my story to a magazine!"  # Infers coach
+npm run test-agent "Can you critique this paragraph?"          # Infers critique
+```
+
+This simulates the exact Slack experience including agent detection, letting you quickly iterate on agent prompts and behavior.
+
 ## Deployment to GCP Cloud Run
 
 ### One-time Setup
@@ -97,7 +119,8 @@ src/
 │   ├── base-agent.ts    # Base agent class
 │   ├── critique-agent.ts
 │   ├── craft-agent.ts
-│   └── prompt-agent.ts
+│   ├── prompt-agent.ts
+│   └── coach-agent.ts
 ├── ai-providers/        # AI provider abstractions
 │   ├── anthropic-provider.ts
 │   └── openai-provider.ts
@@ -107,6 +130,7 @@ src/
 ├── config/             # Configuration
 │   ├── agents.yaml     # Agent system prompts
 │   └── env.ts
+├── test-agent.ts      # CLI tool for testing agents locally
 └── index.ts           # Entry point
 ```
 
@@ -124,11 +148,13 @@ src/
    @Story Builders @critique [paste your writing or attach a file]
    @Story Builders @craft Can you prepare a talk about point of view?
    @Story Builders @prompt Give me a character-based prompt
+   @Story Builders @coach I just finished my first draft!
    ```
 
 3. **The bot will infer the agent if you don't specify**
    ```
    @Story Builders Can you critique this passage? [paste writing]
+   @Story Builders I just submitted my story to a magazine!  # Infers coach
    ```
 
 ## Customization
