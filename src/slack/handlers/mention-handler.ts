@@ -127,7 +127,7 @@ async function handleMention(
 /**
  * Infer which agent to use based on message content
  */
-function inferAgentFromContext(text: string): 'critique' | 'craft' | 'prompt' {
+function inferAgentFromContext(text: string): 'critique' | 'craft' | 'prompt' | 'coach' {
   const lower = text.toLowerCase();
 
   if (
@@ -152,6 +152,18 @@ function inferAgentFromContext(text: string): 'critique' | 'craft' | 'prompt' {
     lower.includes('idea')
   ) {
     return 'prompt';
+  }
+
+  if (
+    lower.includes('coach') ||
+    lower.includes('celebrate') ||
+    lower.includes('milestone') ||
+    lower.includes('goal') ||
+    lower.includes('submitted') ||
+    lower.includes('finished') ||
+    lower.includes('completed')
+  ) {
+    return 'coach';
   }
 
   // Default to critique
