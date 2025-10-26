@@ -8,6 +8,7 @@ AI-powered Slack agents for writing groups - providing critique, craft talks, an
 - **@craft** - Research and prepare writing craft talks on specific topics
 - **@prompt** - Generate creative writing prompts and discuss your work
 - **@coach** - Celebrate milestones and get motivational support for your writing journey
+- **@recommend** - Get reading recommendations based on books and authors you've enjoyed
 
 ## Quick Start
 
@@ -120,7 +121,8 @@ src/
 │   ├── critique-agent.ts
 │   ├── craft-agent.ts
 │   ├── prompt-agent.ts
-│   └── coach-agent.ts
+│   ├── coach-agent.ts
+│   └── recommend-agent.ts
 ├── ai-providers/        # AI provider abstractions
 │   ├── anthropic-provider.ts
 │   └── openai-provider.ts
@@ -149,12 +151,14 @@ src/
    @Story Builders @craft Can you prepare a talk about point of view?
    @Story Builders @prompt Give me a character-based prompt
    @Story Builders @coach I just finished my first draft!
+   @Story Builders @recommend I loved "The Night Circus" - what should I read next?
    ```
 
 3. **The bot will infer the agent if you don't specify**
    ```
    @Story Builders Can you critique this passage? [paste writing]
    @Story Builders I just submitted my story to a magazine!  # Infers coach
+   @Story Builders What books are similar to Ursula K. Le Guin?  # Infers recommend
    ```
 
 ## Customization

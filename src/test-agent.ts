@@ -80,7 +80,7 @@ async function main() {
  * Infer which agent to use based on message content
  * (Same logic as in mention-handler.ts)
  */
-function inferAgentFromContext(text: string): 'critique' | 'craft' | 'prompt' | 'coach' {
+function inferAgentFromContext(text: string): 'critique' | 'craft' | 'prompt' | 'coach' | 'recommend' {
   const lower = text.toLowerCase();
 
   if (
@@ -117,6 +117,17 @@ function inferAgentFromContext(text: string): 'critique' | 'craft' | 'prompt' | 
     lower.includes('completed')
   ) {
     return 'coach';
+  }
+
+  if (
+    lower.includes('recommend') ||
+    lower.includes('recommendation') ||
+    lower.includes('similar to') ||
+    lower.includes('like') && (lower.includes('book') || lower.includes('author') || lower.includes('story')) ||
+    lower.includes('suggest') ||
+    lower.includes('what should i read')
+  ) {
+    return 'recommend';
   }
 
   // Default to critique

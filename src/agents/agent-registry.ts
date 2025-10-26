@@ -6,9 +6,10 @@ import { CritiqueAgent } from './critique-agent';
 import { CraftAgent } from './craft-agent';
 import { PromptAgent } from './prompt-agent';
 import { CoachAgent } from './coach-agent';
+import { RecommendAgent } from './recommend-agent';
 import { IAIProvider, getProvider } from '../ai-providers';
 
-type AgentType = 'critique' | 'craft' | 'prompt' | 'coach';
+type AgentType = 'critique' | 'craft' | 'prompt' | 'coach' | 'recommend';
 
 export class AgentRegistry {
   private agents: Map<AgentType, BaseAgent> = new Map();
@@ -40,6 +41,7 @@ export class AgentRegistry {
     const craftConfig = this.configs.get('craft');
     const promptConfig = this.configs.get('prompt');
     const coachConfig = this.configs.get('coach');
+    const recommendConfig = this.configs.get('recommend');
 
     if (critiqueConfig) {
       const provider = this.getProviderForAgent(critiqueConfig);
@@ -59,6 +61,11 @@ export class AgentRegistry {
     if (coachConfig) {
       const provider = this.getProviderForAgent(coachConfig);
       this.agents.set('coach', new CoachAgent(coachConfig, provider));
+    }
+
+    if (recommendConfig) {
+      const provider = this.getProviderForAgent(recommendConfig);
+      this.agents.set('recommend', new RecommendAgent(recommendConfig, provider));
     }
   }
 
@@ -87,6 +94,7 @@ export class AgentRegistry {
     if (normalized.includes('craft')) return 'craft';
     if (normalized.includes('prompt')) return 'prompt';
     if (normalized.includes('coach')) return 'coach';
+    if (normalized.includes('recommend')) return 'recommend';
 
     return null;
   }
