@@ -8,7 +8,7 @@ AI-powered Slack agents for writing groups - providing critique, craft talks, an
 - **@craft** - Research and prepare writing craft talks on specific topics
 - **@prompt** - Generate creative writing prompts and discuss your work
 - **@coach** - Celebrate milestones and get motivational support for your writing journey
-- **@recommend** - Get reading recommendations based on books and authors you've enjoyed
+- **@recommend** - Get reading recommendations based on books and authors you've enjoyed (provides suggestions first, then asks clarifying questions)
 
 ## Quick Start
 
@@ -81,10 +81,12 @@ npm run test-agent "<message>"
 # Test with explicit agent mention
 npm run test-agent "@coach I just finished my first draft!"
 npm run test-agent "@critique Please review this passage: It was a dark and stormy night..."
+npm run test-agent "@recommend I loved 'The Night Circus' - what should I read next?"
 
 # Test with auto-detection
 npm run test-agent "I just submitted my story to a magazine!"  # Infers coach
 npm run test-agent "Can you critique this paragraph?"          # Infers critique
+npm run test-agent "What books are similar to Ursula K. Le Guin?"  # Infers recommend
 ```
 
 This simulates the exact Slack experience including agent detection, letting you quickly iterate on agent prompts and behavior.
