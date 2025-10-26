@@ -43,26 +43,23 @@ export class CritiqueAgent extends BaseAgent {
   }
 
   /**
-   * Check if the message seems to contain a writing sample
+   * Check if the message seems to contain a writing sample or critique request
    */
   private seemsLikeWritingSample(message: string): boolean {
-    // Simple heuristic: if message is longer than 100 characters and contains
-    // narrative markers, it might be a writing sample
-    if (message.length < 100) return false;
-
-    const narrativeMarkers = [
-      '"',
-      '"',
-      '"',
-      'said',
-      'thought',
-      'walked',
-      'looked',
-      'felt',
-    ];
     const lowerMessage = message.toLowerCase();
 
-    return narrativeMarkers.some((marker) => lowerMessage.includes(marker));
+    // Check if user is explicitly requesting a critique
+    const critiqueRequestMarkers = [
+      'critique',
+      'review',
+      'feedback',
+      'look at',
+    ];
+
+    // If user explicitly asks for critique, process the message
+    return critiqueRequestMarkers.some((marker) =>
+      lowerMessage.includes(marker)
+    );
   }
 
   /**
